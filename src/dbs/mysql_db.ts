@@ -1,6 +1,7 @@
 import { Product } from "../compiled_proto/app";
 import { IDatabase } from "../interfaces";
 import { Category, Order, User, UserPatchRequest } from "../types";
+import { v4 as uuidv4 } from 'uuid'; 
 import mysql from "mysql2/promise";
 
 export default class MySqlDB implements IDatabase {
@@ -68,11 +69,12 @@ export default class MySqlDB implements IDatabase {
       [id, userId, totalAmount]
     );
   
-    // Replace 'items' with 'products'
     for (const product of order.products) {
+      // Generate a unique ID for each order item
+      const orderItemId = uuidv4(); // Using UUID to generate unique ID for each item
       await this.connection.query(
-        `INSERT INTO order_items (orderId, productId, quantity) VALUES (?, ?, ?)`,
-        [order.id, product.productId, product.quantity]
+        `INSERT INTO order_items (id, orderId, productId, quantity) VALUES (?, ?, ?, ?)`,
+        [orderItemId, order.id, product.productId, product.quantity]
       );
     }
   }
