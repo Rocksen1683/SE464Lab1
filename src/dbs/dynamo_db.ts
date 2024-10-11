@@ -13,7 +13,6 @@ export default class DynamoDB implements IDatabase {
   };
 
   async queryRandomProduct() {
-    // Query to get a random product by scanning all products and picking one
     const command = new ScanCommand({
       TableName: "Products",
     });
@@ -141,7 +140,6 @@ export default class DynamoDB implements IDatabase {
     await this.docClient.send(command);
     console.log("Order inserted successfully");
 
-    // Optionally delete the order after insertion
     await this.deleteOrder(order.id);
 };
 
@@ -157,7 +155,7 @@ async updateUser(patch: UserPatchRequest): Promise<void> {
 
   if (patch.password) {
     updateExpressions.push("password = :password");
-    expressionAttributeValues[":password"] = patch.password; // Assuming password is already hashed
+    expressionAttributeValues[":password"] = patch.password; 
   }
 
   if (updateExpressions.length === 0) {

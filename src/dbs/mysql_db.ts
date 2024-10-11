@@ -70,8 +70,7 @@ export default class MySqlDB implements IDatabase {
     );
   
     for (const product of order.products) {
-      // Generate a unique ID for each order item
-      const orderItemId = uuidv4(); // Using UUID to generate unique ID for each item
+      const orderItemId = uuidv4(); //unique id for each order
       await this.connection.query(
         `INSERT INTO order_items (id, orderId, productId, quantity) VALUES (?, ?, ?, ?)`,
         [orderItemId, order.id, product.productId, product.quantity]
@@ -83,12 +82,6 @@ export default class MySqlDB implements IDatabase {
     const fields: string[] = [];
     const values: any[] = [];
   
-    // Since 'name' doesn't exist in UserPatchRequest, remove this block
-    // if (patch.name) {
-    //   fields.push("name = ?");
-    //   values.push(patch.name);
-    // }
-  
     if (patch.email) {
       fields.push("email = ?");
       values.push(patch.email);
@@ -96,7 +89,7 @@ export default class MySqlDB implements IDatabase {
   
     if (patch.password) {
       fields.push("password = ?");
-      values.push(patch.password); // Assuming password is hashed
+      values.push(patch.password); 
     }
   
     if (fields.length > 0) {
