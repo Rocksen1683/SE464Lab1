@@ -7,6 +7,7 @@ import logger from "../logger";
 
 export default class MySqlDB implements IDatabase {
   connection: mysql.Connection;
+  private totalRequests: number = 0;
 
   async init() {
     this.connection = await mysql.createConnection({
@@ -24,14 +25,20 @@ export default class MySqlDB implements IDatabase {
   }
 
   async queryProductById(productId: string) {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryProductById, Total requests: ${this.totalRequests}`, { productId });
     return (await this.connection.query(`SELECT * FROM products WHERE id = ?`, [productId]))[0][0] as Product;
   }
 
   async queryRandomProduct() {
+    this.totalRequests++;
+    logger.info(`Incoming request - queryRandomProduct, Total requests: ${this.totalRequests}`);
     return (await this.connection.query(`SELECT * FROM products ORDER BY RAND() LIMIT 1;`))[0][0] as Product;
   }
 
   queryAllProducts = async (categoryId?: string) => {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryAllProducts, Total requests: ${this.totalRequests}`, { categoryId });
     if (categoryId) {
       return (await this.connection.query(`SELECT * FROM products WHERE categoryId = ?`, [categoryId]))[0] as Product[];
     } else {
@@ -40,30 +47,44 @@ export default class MySqlDB implements IDatabase {
   }
 
   queryAllCategories = async () => {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryAllCategories, Total requests: ${this.totalRequests}`);
     return (await this.connection.query("SELECT * FROM categories;"))[0] as Category[];
   }
 
   queryAllOrders = async () => {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryAllOrders, Total requests: ${this.totalRequests}`);
     return (await this.connection.query("SELECT * FROM orders;"))[0] as Order[];
   }
 
   async queryOrdersByUser(userId: string) {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryOrdersByUser, Total requests: ${this.totalRequests}`, { userId });
     return (await this.connection.query(`SELECT * FROM orders WHERE userId = ?`, [userId]))[0] as Order[];
   }
 
   queryOrderById = async (id: string) => {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryOrderById, Total requests: ${this.totalRequests}`, { orderId: id });
     return (await this.connection.query(`SELECT * FROM orders WHERE id = ?`, [id]))[0][0];
   }
 
   queryUserById = async (id: string) => {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryUserById, Total requests: ${this.totalRequests}`, { userId: id });
     return (await this.connection.query(`SELECT id, email, name FROM users WHERE id = ?`, [id]))[0][0];
   }
 
   queryAllUsers = async () => {
+    this.totalRequests++;
+    logger.info(`Incoming request: queryAllUsers, Total requests: ${this.totalRequests}`);
     return (await this.connection.query("SELECT id, name, email FROM users"))[0] as User[];
   }
 
   insertOrder = async (order: Order) => {
+    this.totalRequests++;
+    logger.info(`Incoming requestL: insertOrder, Total requests: ${this.totalRequests}`, { orderId: order.id, userId: order.userId });
     const { id, userId, totalAmount } = order;
     await this.connection.query(
       `INSERT INTO orders (id, userId, totalAmount) VALUES (?, ?, ?)`,
@@ -80,6 +101,8 @@ export default class MySqlDB implements IDatabase {
   }
   
   updateUser = async (patch: UserPatchRequest) => {
+    this.totalRequests++;
+    logger.info(`Incoming request: updateUser, Total requests: ${this.totalRequests}`, { userId: patch.id });
     const fields: string[] = [];
     const values: any[] = [];
   
@@ -103,6 +126,8 @@ export default class MySqlDB implements IDatabase {
   
 
   deleteOrder = async (id: string) => {
+    this.totalRequests++;
+    logger.info(`Incoming request: deleteOrder, Total requests: ${this.totalRequests}`, { orderId: id });
     await this.connection.query(`DELETE FROM order_items WHERE orderId = ?`, [id]);
     await this.connection.query(`DELETE FROM orders WHERE id = ?`, [id]);
   }
