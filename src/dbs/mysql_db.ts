@@ -3,7 +3,7 @@ import { IDatabase } from "../interfaces";
 import { Category, Order, User, UserPatchRequest } from "../types";
 import { v4 as uuidv4 } from 'uuid'; 
 import mysql from "mysql2/promise";
-import { logger } from "../logger";
+import logger from "../logger";
 
 export default class MySqlDB implements IDatabase {
   connection: mysql.Connection;
@@ -24,18 +24,18 @@ export default class MySqlDB implements IDatabase {
   }
 
   async queryProductById(productId: string) {
-    return (await this.connection.query(SELECT * FROM products WHERE id = ?, [productId]))[0][0] as Product;
+    return (await this.connection.query(`SELECT * FROM products WHERE id = ?`, [productId]))[0][0] as Product;
   }
 
   async queryRandomProduct() {
-    return (await this.connection.query(SELECT * FROM products ORDER BY RAND() LIMIT 1;))[0][0] as Product;
+    return (await this.connection.query(`SELECT * FROM products ORDER BY RAND() LIMIT 1;`))[0][0] as Product;
   }
 
   queryAllProducts = async (categoryId?: string) => {
     if (categoryId) {
-      return (await this.connection.query(SELECT * FROM products WHERE categoryId = ?, [categoryId]))[0] as Product[];
+      return (await this.connection.query(`SELECT * FROM products WHERE categoryId = ?`, [categoryId]))[0] as Product[];
     } else {
-      return (await this.connection.query(SELECT * FROM products))[0] as Product[];
+      return (await this.connection.query(`SELECT * FROM products`))[0] as Product[];
     }
   }
 
@@ -48,15 +48,15 @@ export default class MySqlDB implements IDatabase {
   }
 
   async queryOrdersByUser(userId: string) {
-    return (await this.connection.query(SELECT * FROM orders WHERE userId = ?, [userId]))[0] as Order[];
+    return (await this.connection.query(`SELECT * FROM orders WHERE userId = ?`, [userId]))[0] as Order[];
   }
 
   queryOrderById = async (id: string) => {
-    return (await this.connection.query(SELECT * FROM orders WHERE id = ?, [id]))[0][0];
+    return (await this.connection.query(`SELECT * FROM orders WHERE id = ?`, [id]))[0][0];
   }
 
   queryUserById = async (id: string) => {
-    return (await this.connection.query(SELECT id, email, name FROM users WHERE id = ?, [id]))[0][0];
+    return (await this.connection.query(`SELECT id, email, name FROM users WHERE id = ?`, [id]))[0][0];
   }
 
   queryAllUsers = async () => {
@@ -66,14 +66,14 @@ export default class MySqlDB implements IDatabase {
   insertOrder = async (order: Order) => {
     const { id, userId, totalAmount } = order;
     await this.connection.query(
-      INSERT INTO orders (id, userId, totalAmount) VALUES (?, ?, ?),
+      `INSERT INTO orders (id, userId, totalAmount) VALUES (?, ?, ?)`,
       [id, userId, totalAmount]
     );
   
     for (const product of order.products) {
       const orderItemId = uuidv4(); //unique id for each order
       await this.connection.query(
-        INSERT INTO order_items (id, orderId, productId, quantity) VALUES (?, ?, ?, ?),
+        `INSERT INTO order_items (id, orderId, productId, quantity) VALUES (?, ?, ?, ?)`,
         [orderItemId, order.id, product.productId, product.quantity]
       );
     }
@@ -95,7 +95,7 @@ export default class MySqlDB implements IDatabase {
   
     if (fields.length > 0) {
       await this.connection.query(
-        UPDATE users SET ${fields.join(", ")} WHERE id = ?,
+        `UPDATE users SET ${fields.join(", ")} WHERE id = ?`,
         [...values, patch.id]
       );
     }
@@ -103,7 +103,7 @@ export default class MySqlDB implements IDatabase {
   
 
   deleteOrder = async (id: string) => {
-    await this.connection.query(DELETE FROM order_items WHERE orderId = ?, [id]);
-    await this.connection.query(DELETE FROM orders WHERE id = ?, [id]);
+    await this.connection.query(`DELETE FROM order_items WHERE orderId = ?`, [id]);
+    await this.connection.query(`DELETE FROM orders WHERE id = ?`, [id]);
   }
 }
