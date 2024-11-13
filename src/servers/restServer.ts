@@ -4,6 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import { AllProductsRequest, Order, OrderRequest, ProductRequest, UserPatchRequest, UserRequest } from "../types";
+import logger from "../logger";
 
 export default class RestServer implements IServer {
 
@@ -122,7 +123,7 @@ export default class RestServer implements IServer {
     }); // Deletes an order by id
 
     this.server.listen(port, () => {
-      console.log(`REST server listening on port ${port}`);
+      logger.info(`REST server listening on port ${port}`);
     });
   }
 }
