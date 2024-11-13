@@ -19,7 +19,13 @@ export default class RestServer implements IServer {
   start() {
     const port = 3000;
     this.server.use(cors());
-    this.server.use(morgan("tiny"));
+    const morganLogs = morgan('tiny', {
+      stream: {
+        write: (msg: string) => logger.info(msg.trim()),
+      },
+    });
+    
+    this.server.use(morganLogs);
     this.server.use(bodyParser.json());
 
     this.server.get("/", (req: express.Request, res: express.Response) => res.send("Hello, World!"));
